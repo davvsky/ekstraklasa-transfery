@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/dawid/LeMSy/opencode/ekstraklasa/transfery/api_server.py", line 175, in <module>
+    run_server()
+  File "/home/dawid/LeMSy/opencode/ekstraklasa/transfery/api_server.py", line 165, in run_server
+    with socketserver.TCPServer(("", PORT), APIHandler) as httpd:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/socketserver.py", line 457, in __init__
+    self.server_bind()
+  File "/usr/lib/python3.12/socketserver.py", line 473, in server_bind
+    self.socket.bind(self.server_address)
+OSError: [Errno 98] Address already in use

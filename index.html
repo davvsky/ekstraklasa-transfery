@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ekstraklasa Transfery</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Ekstraklasa Transfery</h1>
+        <p>Przegląd transferów polskiej pierwszej ligi</p>
+    </header>
+
+    <main>
+        <section id="filters">
+            <div class="filter-group">
+                <label for="team-filter">Filtruj drużynę:</label>
+                <select id="team-filter">
+                    <option value="">Wszystkie drużyny</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="transfer-type">Typ transferu:</label>
+                <select id="transfer-type">
+                    <option value="">Wszystkie</option>
+                    <option value="in">Przyjścia</option>
+                    <option value="out">odejścia</option>
+                </select>
+            </div>
+        </section>
+
+        <section id="transfers-container">
+            <div class="loading">Ładowanie danych...</div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Ekstraklasa Transfery - Dane z oficjalnych źródeł</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

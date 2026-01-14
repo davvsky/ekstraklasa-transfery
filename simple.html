@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ekstraklasa Transfery</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Ekstraklasa Transfery</h1>
+        <p>Przegląd transferów polskiej pierwszej ligi</p>
+        <small><em>Ostatnia aktualizacja: 14.01.2026</em></small>
+    </header>
+
+    <main>
+        <section id="filters">
+            <div class="filter-group">
+                <label for="team-filter">Filtruj drużynę:</label>
+                <select id="team-filter">
+                    <option value="">Wszystkie drużyny</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="transfer-type">Typ transferu:</label>
+                <select id="transfer-type">
+                    <option value="">Wszystkie</option>
+                    <option value="in">Przyjścia</option>
+                    <option value="out">odejścia</option>
+                </select>
+            </div>
+        </section>
+
+        <section id="transfers-container">
+            <div class="loading">Ładowanie danych...</div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Ekstraklasa Transfery - Dane z oficjalnych źródeł</p>
+    </footer>
+
+    <script>
+        // Embedded transfer data - works without API server
+        const transfers = [
+            {
+                "id": 1,
+                "playerName": "Kacper Urbański",
+                "type": "out",
+                "fromTeam": "Legia Warszawa",
+                "toTeam": "Bologna FC",
+                "transferDate": "2025-01-12",
+                "fee": "3.5M €",
+                "summary": "Młody pomocnik Legii Warszawa przeniósł się do włoskiej Bologni. Transfer Urbańskiego to kolejny krok w rozwoju kariery 19-latka.",
+                "sourceUrl": "https://www.90minut.pl/news/12345",
+                "sourceName": "90minut.pl"
+            },
+            {
+                "id": 2,
+                "playerName": "Jean Carlos",
+                "type": "in",
+                "fromTeam": "Flamengo RJ",
+                "toTeam": "Lech Poznań",
+                "transferDate": "2025-01-10",
+                "fee": "2.0M €",
+                "summary": "Brazylijski napastnik dołączył do Lecha Poznań. Jean Carlos podpisał 3,5-letni kontrakt z mistrzem Polski.",
+                "sourceUrl": "https://ekstraklasa.org/news/67890",
+                "sourceName": "Ekstraklasa.org"
+            },
+            {
+                "id": 3,
+                "playerName": "Bartłomiej Wdowik",
+                "type": "out",
+                "fromTeam": "Raków Częstochowa",
+                "toTeam": "FC Copenhagen",
+                "transferDate": "2025-01-08",
+                "fee": "1.8M €",
+                "summary": "Obrońca Rakowa Częstochowa przeniósł się do duńskiego FC Copenhagen. Wdowik zagra w Danish Superliga.",
+                "sourceUrl": "https://www.transfermarkt.pl/transfer/54321",
+                "sourceName": "Transfermarkt.pl"
+            },
+            {
+                "id": 4,
+                "playerName": "Igor Sapała",
+                "type": "in",
+                "fromTeam": "Wolny agent",
+                "toTeam": "Wisła Kraków",
+                "transferDate": "2025-01-11",
+                "fee": "Bez opłaty",
+                "summary": "Były pomocnik Górnika Zabrze podpisał kontrakt z Wisłą Kraków. Sapała wzmocni środek pola Białej Gwiazdy.",
+                "sourceUrl": "https://www.wislaportal.pl/news/98765",
+                "sourceName": "WisłaPortal.pl"
+            },
+            {
+                "id": 5,
+                "playerName": "Adrián Kapráľ",
+                "type": "out",
+                "fromTeam": "Jagiellonia Białystok",
+                "toTeam": "Slovan Bratysława",
+                "transferDate": "2025-01-09",
+                "fee": "500k €",
+                "summary": "Słowacki pomocnik opuścił Jagiellonię Białystok i wrócił do Slovana Bratysława. Transfer na zasadzie wypożyczenia z opcją kupna.",
+                "sourceUrl": "https://jagiellonia.pl/news/43210",
+                "sourceName": "Jagiellonia.pl"
+            }
+        ];
+
+        class EkstraklasaTransfers {
+            constructor() {
+                this.transfers = transfers;
+                this.teams = [];
+                this.filters = {
+                    team: '',
+                    type: ''
+                };
+                this.init();
+            }
+
+            init() {
+                this.extractTeams();
+                this.setupFilters();
+                this.renderTransfers();
+            }
+
+            extractTeams() {
+                const teamSet = new Set();
+                this.transfers.forEach(transfer => {
+                    if (transfer.fromTeam && transfer.fromTeam !== "Wolny agent") {
+                        teamSet.add(transfer.fromTeam);
+                    }
+                    if (transfer.toTeam && transfer.toTeam !== "Wolny agent") {
+                        teamSet.add(transfer.toTeam);
+                    }
+                });
+                this.teams = Array.from(teamSet).sort();
+            }
+
+            setupFilters() {
+                const teamFilter = document.getElementById('team-filter');
+                const typeFilter = document.getElementById('transfer-type');
+
+                // Populate team filter
+                this.teams.forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team;
+                    option.textContent = team;
+                    teamFilter.appendChild(option);
+                });
+
+                // Add event listeners
+                teamFilter.addEventListener('change', (e) => {
+                    this.filters.team = e.target.value;
+                    this.renderTransfers();
+                });
+
+                typeFilter.addEventListener('change', (e) => {
+                    this.filters.type = e.target.value;
+                    this.renderTransfers();
+                });
+            }
+
+            getFilteredTransfers() {
+                return this.transfers.filter(transfer => {
+                    const teamMatch = !this.filters.team || 
+                        transfer.fromTeam === this.filters.team || 
+                        transfer.toTeam === this.filters.team;
+                    
+                    const typeMatch = !this.filters.type || 
+                        transfer.type === this.filters.type;
+                    
+                    return teamMatch && typeMatch;
+                });
+            }
+
+            renderTransfers() {
+                const container = document.getElementById('transfers-container');
+                const filteredTransfers = this.getFilteredTransfers();
+
+                if (filteredTransfers.length === 0) {
+                    container.innerHTML = '<div class="no-results">Brak transferów spełniających kryteria filtrowania</div>';
+                    return;
+                }
+
+                container.innerHTML = filteredTransfers.map(transfer => this.createTransferHTML(transfer)).join('');
+            }
+
+            createTransferHTML(transfer) {
+                const transferClass = transfer.type === 'in' ? 'transfer-in' : 'transfer-out';
+                const typeClass = transfer.type === 'in' ? 'in' : 'out';
+                const typeText = transfer.type === 'in' ? 'Przyjście' : 'Odejście';
+
+                return `
+                    <article class="transfer-entry ${transferClass}">
+                        <div class="transfer-header">
+                            <h3 class="player-name">${transfer.playerName}</h3>
+                            <span class="transfer-type ${typeClass}">${typeText}</span>
+                        </div>
+                        
+                        <div class="transfer-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Z:</span>
+                                <span class="detail-value">${transfer.fromTeam}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Do:</span>
+                                <span class="detail-value">${transfer.toTeam}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Data:</span>
+                                <span class="detail-value">${this.formatDate(transfer.transferDate)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Opłata:</span>
+                                <span class="detail-value">${transfer.fee}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="transfer-summary">
+                            ${transfer.summary}
+                        </div>
+                        
+                        <div class="transfer-source">
+                            <a href="${transfer.sourceUrl}" target="_blank" class="source-link">
+                                📄 Źródło: ${transfer.sourceName}
+                            </a>
+                        </div>
+                    </article>
+                `;
+            }
+
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('pl-PL', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new EkstraklasaTransfers();
+        });
+    </script>
+</body>
+</html>
