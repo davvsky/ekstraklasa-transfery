@@ -23,9 +23,13 @@ jobs:
       with:
         python-version: '3.9'
     
-    - name: Run scraper
+    - name: Install dependencies
       run: |
-        python3 real_scraper.py
+        pip install requests beautifulsoup4 lxml
+    
+    - name: Run real scraper
+      run: |
+        python3 live_scraper.py
         
     - name: Update HTML with new data
       run: |
